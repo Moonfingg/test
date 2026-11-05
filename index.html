@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Қазіргі бизнес-коммуникация — 3D презентация</title>
+<meta name="description" content="Бове мен Тиллдің «Қазіргі бизнес-коммуникация» кітабы бойынша 3D-кітап түріндегі презентация">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   НЕГІЗГІ СТИЛЬДЕР
+   ============================================================ */
+:root{
+  --ink:#1b1650;
+  --ink-soft:#4a4470;
+  --violet:#8a3297;
+  --blue:#2c2f8f;
+  --cyan:#35a6dc;
+  --paper:#fcfaf4;
+  --ui:#16123a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#fff;overflow:hidden;overscroll-behavior:none}
+body{font-family:"PT Serif",Georgia,serif;color:var(--ui);-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
+
+/* ---------- Жоғарғы панель ---------- */
+.topbar{position:fixed;z-index:20;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(12px,3vw,32px);pointer-events:none}
+.topbar>*{pointer-events:auto}
+.brand{display:flex;flex-direction:column;line-height:1.15;font-family:Lora,serif}
+.brand b{font-weight:600;font-size:15px;letter-spacing:.01em}
+.brand span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8a83ad;font-family:"PT Serif",serif}
+.tools{display:flex;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 15px;border-radius:999px;border:1px solid rgba(40,30,110,.14);background:rgba(255,255,255,.85);backdrop-filter:blur(6px);font-size:13.5px;letter-spacing:.02em;transition:transform .2s, border-color .2s, box-shadow .2s, background .2s}
+.pill:hover{border-color:rgba(106,61,240,.5);box-shadow:0 6px 20px rgba(80,50,200,.12);transform:translateY(-1px)}
+.pill:active{transform:translateY(1px) scale(.98)}
+.pill:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.pill svg{width:17px;height:17px;flex:none}
+.pill.primary{background:linear-gradient(120deg,var(--violet),var(--blue));color:#fff;border-color:transparent}
+.pill.primary:hover{box-shadow:0 8px 24px rgba(70,60,240,.32)}
+.pill.icon{width:38px;padding:0;justify-content:center}
+.pill[disabled]{opacity:.35;pointer-events:none}
+
+/* ---------- Сахна ---------- */
+#stage{position:fixed;inset:0;perspective:var(--persp,2400px);perspective-origin:50% 30%;touch-action:none;user-select:none;-webkit-user-select:none;opacity:0;transition:opacity 1.2s ease;cursor:pointer}
+#stage.ready{opacity:1}
+#floor{position:absolute;left:50%;top:0;width:200px;height:60px;border-radius:50%;background:radial-gradient(closest-side,rgba(28,20,70,.30),rgba(28,20,70,.12) 55%,rgba(28,20,70,0));filter:blur(10px);transform:translate(-50%,-50%);pointer-events:none;animation:floorPulse 7s ease-in-out infinite}
+#sway{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% var(--cy,50%);animation:sway 7s ease-in-out infinite}
+@keyframes sway{
+  0%,100%{transform:translate3d(0,0,0) rotateX(0) rotateZ(0)}
+  50%{transform:translate3d(0,-7px,0) rotateX(1.4deg) rotateZ(-.5deg)}
+}
+@keyframes floorPulse{0%,100%{opacity:1}50%{opacity:.78}}
+#rig{position:absolute;left:50%;top:var(--cy,50%);width:0;height:0;transform-style:preserve-3d}
+#book{position:absolute;left:calc(-1 * var(--W));top:calc(-.5 * var(--H));width:calc(2 * var(--W));height:var(--H);transform-style:preserve-3d;pointer-events:none}
+#spread,#closed,#leaves{position:absolute;inset:0;transform-style:preserve-3d}
+.hidden{visibility:hidden}
+#spread.no-left .side-left{visibility:hidden}
+
+/* ---------- Мұқаба тақталары мен бет қабаттары ---------- */
+.board{position:absolute;top:calc(-1 * var(--m));height:calc(var(--H) + 2 * var(--m));width:calc(var(--W) + var(--m));background:linear-gradient(135deg,#f1eff8,#e6e3f2);box-shadow:0 0 0 1px rgba(60,50,130,.10),0 12px 40px rgba(30,20,80,.16)}
+.b-left{left:calc(-1 * var(--m));border-radius:5px 1px 1px 5px}
+.b-right{left:var(--W);border-radius:1px 5px 5px 1px}
+.edge{position:absolute}
+.fe-left,.fe-right{top:0;width:var(--S);height:var(--H);transform-origin:left center;background:repeating-linear-gradient(to right,#f7f2e6 0 1.1px,#d8cfbd 1.1px 1.7px)}
+.fe-left{left:0;transform:rotateY(-90deg)}
+.fe-right{left:calc(2 * var(--W));transform:translateZ(var(--S)) rotateY(90deg)}
+.be-left,.be-right{top:var(--H);width:var(--W);height:var(--S);transform-origin:top center;transform:translateZ(var(--S)) rotateX(-90deg);background:repeating-linear-gradient(to bottom,#f6f1e4 0 1.1px,#d3cab7 1.1px 1.7px)}
+.be-left{left:0}.be-right{left:var(--W)}
+.page.static{position:absolute;top:0;width:var(--W);height:var(--H);transform:translateZ(var(--S))}
+.p-left{left:0}.p-right{left:var(--W)}
+.pc{position:absolute;inset:0}
+.pshadow{position:absolute;inset:0;pointer-events:none}
+
+/* ---------- Аударылатын парақ (жолақтарға бөлінген) ---------- */
+.leaf{position:absolute;top:0;left:var(--W);width:var(--lw);height:var(--H);transform-style:preserve-3d;transform-origin:left center}
+.leaf.lcover{top:calc(-1 * var(--m));height:calc(var(--H) + 2 * var(--m))}
+.strip{position:absolute;top:0;height:100%;width:calc(var(--lw) / var(--n));transform-style:preserve-3d;transform-origin:left center}
+.face{position:absolute;top:0;left:0;height:100%;width:calc(100% + .8px);overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.back{transform:rotateY(180deg)}
+.fc{position:absolute;top:0;height:100%;width:var(--lw)}
+.sh{position:absolute;inset:0;pointer-events:none}
+.sh{will-change:transform}
+.strip{will-change:transform}
+.pshadow{will-change:transform}
+
+/* ---------- Жабық кітап (қорап) ---------- */
+.cf{position:absolute;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.cf.front,.cf.back{left:var(--W);top:calc(-1 * var(--m));width:calc(var(--W) + var(--m));height:calc(var(--H) + 2 * var(--m))}
+.cf.front{transform:translateZ(var(--D));border-radius:1px 5px 5px 1px}
+.cf.back{transform:rotateY(180deg);border-radius:5px 1px 1px 5px}
+.cf.spine{left:var(--W);top:calc(-1 * var(--m));width:var(--D);height:calc(var(--H) + 2 * var(--m));transform-origin:left center;transform:rotateY(-90deg);background:linear-gradient(90deg,#5e2172,#8a3297 35%,#93409f 60%,#4a2380);}
+.cf.fore{left:calc(2 * var(--W) + var(--m));top:calc(-1 * var(--m));width:var(--D);height:calc(var(--H) + 2 * var(--m));transform-origin:left center;transform:translateZ(var(--D)) rotateY(90deg);background:linear-gradient(to right,#e9e6f3 0 2px,transparent 2px calc(100% - 2px),#e9e6f3 calc(100% - 2px)),repeating-linear-gradient(to right,#f7f2e6 0 1.1px,#d6cdb9 1.1px 1.7px)}
+.cf.top,.cf.bottom{left:var(--W);width:calc(var(--W) + var(--m));height:var(--D);transform-origin:top center;background:linear-gradient(to bottom,#e9e6f3 0 2px,transparent 2px calc(100% - 2px),#e9e6f3 calc(100% - 2px)),repeating-linear-gradient(to bottom,#f7f2e6 0 1.1px,#d6cdb9 1.1px 1.7px)}
+.cf.top{top:calc(-1 * var(--m));transform:rotateX(90deg)}
+.cf.bottom{top:calc(var(--H) + var(--m));transform:translateZ(var(--D)) rotateX(-90deg)}
+
+/* ---------- Мұқаба дизайны ---------- */
+.cover{position:absolute;inset:0;background:#fff;overflow:hidden;font-family:Lora,serif;color:var(--ink)}
+.cover svg.art{position:absolute;inset:0;width:100%;height:100%}
+.cover img.photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;-webkit-user-drag:none;user-select:none}
+/* Финал: артқы мұқабадағы алғыс тақтасы */
+.bc-card{position:absolute;left:9%;right:9%;top:35.5%;height:30%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 calc(var(--u)*5);background:rgba(255,255,255,.965);border-radius:calc(var(--u)*1.4);box-shadow:0 0 0 1px rgba(138,50,151,.16),0 calc(var(--u)*2) calc(var(--u)*7) rgba(40,20,90,.16);opacity:0;transform:scale(.86) translateY(4%);transition:opacity .9s ease,transform 1.2s cubic-bezier(.2,1.3,.4,1);overflow:hidden}
+.bc-card::before,.bc-card::after{content:"";position:absolute;height:calc(var(--u)*1.3);transform:skewX(-38deg) scaleX(0);transition:transform 1s cubic-bezier(.7,0,.2,1)}
+.bc-card::before{top:calc(var(--u)*3);left:-4%;width:46%;background:var(--violet);transform-origin:left;transition-delay:.5s}
+.bc-card::after{bottom:calc(var(--u)*3);right:-4%;width:40%;background:linear-gradient(90deg,var(--cyan),var(--blue));transform-origin:right;transition-delay:.7s}
+.bc-card .kick{font-family:"PT Serif",serif;font-size:max(6px,calc(var(--u)*2.2));letter-spacing:.34em;text-transform:uppercase;color:var(--violet);margin-bottom:calc(var(--u)*2.6);opacity:0;transition:opacity .8s .6s}
+.bc-card h2{font-family:Lora,serif;font-weight:700;font-size:max(13px,calc(var(--u)*6.6));line-height:1.14;color:var(--blue);letter-spacing:-.005em}
+.bc-card h2 .w{display:inline-block;white-space:nowrap}
+.bc-card h2 .ch{display:inline-block;opacity:0;transform:translateY(.55em) rotateX(-80deg);filter:blur(4px);transition:opacity .5s,transform .7s cubic-bezier(.2,1.4,.4,1),filter .6s}
+.bc-card .orn{display:block;margin:calc(var(--u)*3.6) auto calc(var(--u)*3);width:0;height:2px;background:linear-gradient(90deg,transparent,var(--violet),var(--cyan),transparent);transition:width 1.2s cubic-bezier(.6,0,.2,1)}
+.bc-card p{font-family:Lora,serif;font-style:italic;font-weight:500;font-size:max(9px,calc(var(--u)*4.2));letter-spacing:.06em;color:#3a2f66;opacity:0;transform:translateY(40%);transition:opacity 1s,transform 1s cubic-bezier(.2,1,.3,1)}
+.bc-shine{position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,rgba(255,255,255,.0) 42%,rgba(255,255,255,.85) 50%,rgba(255,255,255,0) 58%,transparent 65%);background-size:300% 100%;background-position:120% 0;mix-blend-mode:screen;opacity:0}
+.finale .bc-card{opacity:1;transform:none}
+.finale .bc-card::before,.finale .bc-card::after{transform:skewX(-38deg) scaleX(1)}
+.finale .bc-card .kick{opacity:1}
+.finale .bc-card h2 .ch{opacity:1;transform:none;filter:none}
+.finale .bc-card .orn{width:42%;transition-delay:1.9s}
+.finale .bc-card p{opacity:1;transform:none;transition-delay:2.3s}
+.finale .bc-shine{animation:shine 2.4s 2.6s cubic-bezier(.5,0,.3,1) both}
+@keyframes shine{0%{opacity:1;background-position:120% 0}100%{opacity:1;background-position:-30% 0}}
+/* Финалдағы қағаз жапырақшалары */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:4;overflow:hidden}
+#confetti i{position:absolute;top:0;left:0;width:var(--w);height:var(--h);background:var(--c);transform:skewX(-35deg);opacity:0;will-change:transform,opacity;animation:flyout var(--d) cubic-bezier(.15,.7,.3,1) var(--dl) forwards}
+@keyframes flyout{0%{opacity:0;transform:translate(0,0) skewX(-35deg) rotate(0)}10%{opacity:1}100%{opacity:0;transform:translate(var(--x),var(--y)) skewX(-35deg) rotate(var(--r))}}
+.cover::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,rgba(30,20,80,.10) 0,rgba(30,20,80,.02) 2.2%,rgba(255,255,255,.6) 3.2%,rgba(30,20,80,.05) 4.4%,transparent 7%),linear-gradient(160deg,rgba(255,255,255,.0) 40%,rgba(255,255,255,.35) 55%,rgba(255,255,255,0) 70%)}
+.cv-tag{position:absolute;left:calc(var(--u)*10);top:calc(var(--u)*10);font-family:"PT Serif",serif;font-size:max(7px,calc(var(--u)*2.3));letter-spacing:.28em;text-transform:uppercase;color:var(--violet)}
+.cv-title{position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*8);top:calc(var(--u)*15.5);font-weight:700;font-size:max(15px,calc(var(--u)*8.6));line-height:1.04;letter-spacing:-.01em}
+.cv-sub{position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*10);top:calc(var(--u)*39);font-style:italic;font-weight:500;font-size:max(8px,calc(var(--u)*3.5));color:var(--ink-soft);line-height:1.3}
+.cv-sub em{display:block;font-style:normal;font-family:"PT Serif",serif;font-size:.78em;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);margin-top:.35em}
+.cv-authors{position:absolute;left:calc(var(--u)*10);bottom:calc(var(--u)*11);font-family:"PT Serif",serif;font-size:max(7px,calc(var(--u)*2.7));letter-spacing:.16em;text-transform:uppercase;line-height:1.7;color:var(--ink)}
+.pearson{position:absolute;right:calc(var(--u)*9);bottom:calc(var(--u)*10.5);display:flex;align-items:center;gap:calc(var(--u)*1.4);font-family:"PT Serif",serif;font-size:max(8px,calc(var(--u)*3.3));color:#123a8f;letter-spacing:.01em}
+.pearson i{display:grid;place-items:center;width:calc(var(--u)*5.6);height:calc(var(--u)*5.6);border-radius:50%;background:#123a8f;color:#fff;font-style:normal;font-family:Lora,serif;font-weight:700;font-size:.95em}
+/* old */.back-cover .bc-text{position:absolute;left:calc(var(--u)*10);right:calc(var(--u)*10);top:44%;transform:translateY(-50%);text-align:center}
+.bc-text h2{font-family:Lora,serif;font-weight:600;font-style:italic;font-size:max(14px,calc(var(--u)*7.2));line-height:1.15;color:var(--ink)}
+.bc-text .orn{display:block;margin:calc(var(--u)*5) auto;width:28%;height:2px;background:linear-gradient(90deg,transparent,var(--violet),var(--blue),transparent)}
+.bc-text p{font-family:"PT Serif",serif;font-size:max(9px,calc(var(--u)*3.6));letter-spacing:.22em;text-transform:uppercase;color:var(--ink-soft)}
+.barcode{position:absolute;left:calc(var(--u)*10);bottom:calc(var(--u)*9);width:calc(var(--u)*20);height:calc(var(--u)*9);background:#fff;padding:calc(var(--u)*1.2);box-shadow:0 0 0 1px rgba(0,0,0,.08)}
+.barcode b{display:block;height:100%;background:repeating-linear-gradient(90deg,#222 0 1px,#fff 1px 2px,#222 2px 4px,#fff 4px 5px,#222 5px 6px,#fff 6px 8px,#222 8px 9px,#fff 9px 11px)}
+.spine-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;flex-direction:column;padding:calc(var(--u)*6) 0;color:#fff}
+.spine-text span{writing-mode:vertical-rl;font-family:Lora,serif;font-size:max(6px,calc(var(--D)*.42));letter-spacing:.08em;white-space:nowrap}
+.inside{position:absolute;inset:0;background:radial-gradient(circle at 30% 20%,rgba(106,61,240,.08),transparent 60%),linear-gradient(135deg,#efecf8,#e3e0f0)}
+.inside .pg-wrap{position:absolute;left:var(--m);top:var(--m);width:var(--W);height:var(--H);box-shadow:0 0 0 1px rgba(0,0,0,.03)}
+
+/* ---------- Қағаз беті ---------- */
+.pg{position:absolute;inset:0;background-color:var(--paper);color:#29243f;padding:calc(var(--u)*11) calc(var(--u)*9.5) calc(var(--u)*12);overflow:hidden;
+  --noise:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .42  0 0 0 0 .36  0 0 0 0 .26  0 0 0 .10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --fiber:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='420'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.012 .09' numOctaves='2' seed='7'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .35  0 0 0 .07 0'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>")}
+.pg.left{background-image:linear-gradient(to left,rgba(70,50,30,.20),rgba(70,50,30,.07) 4%,rgba(70,50,30,0) 13%),linear-gradient(to right,rgba(60,40,20,.05),transparent 5%),var(--noise),var(--fiber)}
+.pg.right{background-image:linear-gradient(to right,rgba(70,50,30,.20),rgba(70,50,30,.07) 4%,rgba(70,50,30,0) 13%),linear-gradient(to left,rgba(60,40,20,.05),transparent 5%),var(--noise),var(--fiber)}
+.pg .run{position:absolute;top:calc(var(--u)*5);left:calc(var(--u)*9.5);right:calc(var(--u)*9.5);font-size:max(5.5px,calc(var(--u)*2.1));letter-spacing:.22em;text-transform:uppercase;color:#958db5;display:flex;align-items:center;gap:calc(var(--u)*2)}
+.pg .run::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(106,61,240,.25),transparent)}
+.pg.right .run{flex-direction:row-reverse}
+.pg.right .run::after{background:linear-gradient(270deg,rgba(106,61,240,.25),transparent)}
+.pg .num{position:absolute;bottom:calc(var(--u)*5.2);font-family:Lora,serif;font-size:max(7px,calc(var(--u)*2.8));color:#6f6896;display:flex;align-items:center;gap:calc(var(--u)*1.6)}
+.pg.left .num{left:calc(var(--u)*9.5)}
+.pg.right .num{right:calc(var(--u)*9.5);flex-direction:row-reverse}
+.pg .num::after{content:"";width:calc(var(--u)*6);height:1px;background:rgba(106,61,240,.35)}
+.pg .kicker{font-size:max(6px,calc(var(--u)*2.3));letter-spacing:.26em;text-transform:uppercase;color:var(--violet);margin-bottom:calc(var(--u)*2.4)}
+.pg h2{font-family:Lora,serif;font-weight:600;font-size:max(11px,calc(var(--u)*6.2));line-height:1.12;color:var(--ink);letter-spacing:-.005em}
+.pg h3{font-family:Lora,serif;font-style:italic;font-weight:500;font-size:max(8px,calc(var(--u)*3.6));color:var(--ink-soft);margin-top:calc(var(--u)*1.6)}
+.pg .rule{width:24%;height:2px;margin:calc(var(--u)*3.6) 0 calc(var(--u)*4);background:linear-gradient(90deg,var(--violet),var(--blue))}
+.pg p{font-size:max(7px,calc(var(--u)*3.25));line-height:1.58;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.pg p+p{text-indent:1.5em;margin-top:.25em}
+.pg p.drop::first-letter{float:left;font-family:Lora,serif;font-weight:600;font-size:3.25em;line-height:.86;padding:.06em .1em 0 0;color:var(--violet)}
+.pg li+li{margin-top:.6em}
+.pg ul{padding-left:1.2em;font-size:max(7px,calc(var(--u)*3.25));line-height:1.55}
+.pg .right-top{margin-top:calc(var(--u)*1)}
+/* Бос орын (мәтін әлі қойылмаған) */
+.pg h2.ph{color:rgba(90,70,170,.30);font-style:italic;border-bottom:1px dashed rgba(90,70,170,.28);padding-bottom:.15em;display:inline-block;min-width:60%}
+.ph-block{position:relative;border:1px dashed rgba(90,70,170,.22);border-radius:4px;padding:calc(var(--u)*3.4) calc(var(--u)*3) calc(var(--u)*2);margin-bottom:calc(var(--u)*4)}
+.ph-block .lbl{position:absolute;top:calc(var(--u)*-1.5);left:calc(var(--u)*2.4);background:var(--paper);padding:0 calc(var(--u)*1.2);font-size:max(5.5px,calc(var(--u)*1.9));letter-spacing:.24em;text-transform:uppercase;color:rgba(90,70,170,.5)}
+.ph-block i{display:block;height:calc(var(--u)*1.25);border-radius:2px;background:rgba(90,70,170,.08);margin-bottom:calc(var(--u)*2.1)}
+.ph-block i:nth-child(3){width:94%}.ph-block i:nth-child(4){width:97%}.ph-block i.short{width:58%}
+.pg.blank .lines{position:absolute;left:calc(var(--u)*9.5);right:calc(var(--u)*9.5);top:calc(var(--u)*13);bottom:calc(var(--u)*13);background:repeating-linear-gradient(to bottom,rgba(40,30,80,.10) 0 calc(var(--u)*1.1),transparent calc(var(--u)*1.1) calc(var(--u)*5.1))}
+
+/* ---------- Нұсқау, басқару ---------- */
+#hint{position:fixed;left:50%;z-index:10;transform:translateX(-50%);font-family:Lora,serif;font-style:italic;font-size:clamp(15px,1.6vw,19px);color:var(--ink-soft);letter-spacing:.02em;pointer-events:none;transition:opacity .6s, transform .6s;display:flex;align-items:center;gap:10px;white-space:nowrap}
+#hint::before,#hint::after{content:"";width:28px;height:1px;background:linear-gradient(90deg,transparent,var(--violet))}
+#hint::after{transform:scaleX(-1)}
+#hint span{animation:breathe 2.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.45}50%{opacity:1}}
+#hint.off{opacity:0;transform:translateX(-50%) translateY(8px)}
+.controls{position:fixed;z-index:20;left:50%;bottom:max(18px,env(safe-area-inset-bottom));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:6px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(40,30,110,.10);box-shadow:0 10px 30px rgba(30,20,90,.08);backdrop-filter:blur(8px)}
+.controls .pill{border-color:transparent;background:transparent;height:40px}
+.controls .pill:hover{background:rgba(106,61,240,.07);box-shadow:none}
+#indicator{min-width:86px;text-align:center;font-family:Lora,serif;font-size:15px;font-variant-numeric:tabular-nums;color:var(--ink)}
+#indicator small{color:#9a93bb}
+#indicator .bar{display:block;height:2px;margin-top:4px;border-radius:2px;background:rgba(106,61,240,.12);overflow:hidden}
+#indicator .bar b{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--blue));transition:width .8s cubic-bezier(.6,0,.2,1)}
+.edge-hint{position:fixed;top:50%;z-index:5;width:46px;height:46px;margin-top:-23px;border-radius:50%;display:grid;place-items:center;color:var(--violet);background:rgba(255,255,255,.7);border:1px solid rgba(106,61,240,.18);opacity:0;transition:opacity .3s, transform .3s;pointer-events:none}
+.edge-hint svg{width:20px;height:20px}
+.edge-hint.l{left:clamp(8px,2vw,28px)}.edge-hint.r{right:clamp(8px,2vw,28px)}
+body.is-open .edge-hint{opacity:.35}
+body.is-open .edge-hint.on{opacity:1;transform:scale(1.08)}
+.toast{position:fixed;left:50%;top:74px;transform:translateX(-50%);z-index:30;background:var(--ui);color:#fff;font-size:13px;padding:8px 14px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.on{opacity:.92}
+@media (max-width:640px){
+  .topbar{height:56px}
+  .brand b{font-size:13px}.brand span{display:none}
+  .pill .txt{display:none}
+  .pill{padding:0 12px}
+  #indicator{min-width:70px;font-size:14px}
+  .edge-hint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand"><b>Қазіргі бизнес-коммуникация</b><span>Бове · Тилл · Pearson</span></div>
+  <div class="tools">
+    <button class="pill primary" id="zipBtn" aria-label="ZIP жүктеу">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      <span class="txt">ZIP жүктеу</span>
+    </button>
+  </div>
+</header>
+
+<main id="stage" aria-label="3D кітап">
+  <div id="floor"></div>
+  <div id="sway"><div id="rig"><div id="book"></div></div></div>
+</main>
+
+<div id="hint"><span>Бастау үшін басыңыз</span></div>
+<div class="edge-hint l" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"/></svg></div>
+<div class="edge-hint r" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></div>
+
+<nav class="controls" aria-label="Навигация">
+  <button class="pill" id="prevBtn" aria-label="Артқа"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 6-6 6 6 6"/></svg><span class="txt">артқа</span></button>
+  <div id="indicator" aria-live="polite"></div>
+  <button class="pill" id="nextBtn" aria-label="Алға"><span class="txt">алға</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></button>
+</nav>
+<div class="toast" id="toast"></div>
+<div id="confetti" aria-hidden="true"></div>
+
+<script>
+/* ==================================================================
+   1. СЛАЙД МӘТІНДЕРІ — тек осы массивті өзгертсеңіз жеткілікті.
+   ------------------------------------------------------------------
+   Әр слайд — кітаптың бір жайылымы (сол жақ + оң жақ бет).
+     kicker   — тақырып үстіндегі шағын жазу (бос болса "N-слайд")
+     title    — сол жақ беттегі тақырып
+     subtitle — қосымша тақырыпша (міндетті емес)
+     left     — сол жақ беттегі абзацтар (жолдар массиві)
+     right    — оң жақ беттегі абзацтар (жолдар массиві)
+   Абзацтарда қарапайым HTML қолдануға болады: <b>, <i>, <ul><li>…
+   Бос қалса, бетте әдемі "бос орын" көрсетіледі.
+   10-слайд — кітаптың артқы мұқабасы (финал).
+   ================================================================== */
+const SLIDES = [
+  { kicker: "Таныстыру", title: "Қазіргі бизнес-коммуникация", subtitle: "", // 1-слайд
+    left: ["<b>Авторлары:</b> Куртланд Л. Бове, Джон В. Тилл"],
+    right: ["<b>Дайындаған:</b> Сержан Біржан"] },
+  { kicker: "Кітап", title: "Кітап туралы", subtitle: "", // 2-слайд
+    left: ["<ul><li>Бұл Pearson баспасының «Business Communication Today» оқулығының қазақша аудармасы (14-ші басылым).</li><li>Кітап бизнестегі қарым-қатынас пен ақпарат алмасу жолдарын түсіндіреді.</li></ul>"],
+    right: ["<ul><li>Онда жазу, сөйлеу, презентация және жұмысқа орналасу тақырыптары қамтылған.</li></ul>"] },
+  { kicker: "Таңдау", title: "Неліктен осы кітапты таңдадым", subtitle: "", // 3-слайд
+    left: ["<ul><li>Дұрыс қарым-қатынас жасай білу кез келген мамандықта қажет.</li><li>Кітап қазақ тілінде және заманауи мысалдарға бай.</li></ul>"],
+    right: ["<ul><li>Бұл білім болашақта жұмысқа орналасу мен командада жұмыс істеуге көмектеседі.</li></ul>"] },
+  { kicker: "Мазмұны", title: "Кітаптың құрылымы", subtitle: "", // 4-слайд
+    left: ["<ul><li>Эмоциялық интеллект және командада жұмыс</li><li>Мәдениетаралық коммуникация</li></ul>"],
+    right: ["<ul><li>Іскерлік хат жазу және әлеуметтік медиа</li><li>Презентация, резюме және сұхбат</li></ul>"] },
+  { kicker: "Термин", title: "Коммуникация", subtitle: "", // 5-слайд
+    left: ["<b>Анықтамасы:</b> ақпаратты, ойды немесе сезімді бір адамнан екінші адамға жеткізу процесі."],
+    right: ["<b>Бизнесте:</b> нәтижелі коммуникация команда жұмысының негізі."] },
+  { kicker: "Термин", title: "Эмоциялық интеллект", subtitle: "", // 6-слайд
+    left: ["<b>Анықтамасы:</b> өз эмоцияларыңды және басқалардың эмоцияларын түсініп, оларды басқара білу қабілеті."],
+    right: ["<b>Мысал:</b> дау кезінде сабырлы қалып, сұхбаттасушыны тыңдау."] },
+  { kicker: "Термин", title: "Мәдениетаралық коммуникация", subtitle: "", // 7-слайд
+    left: ["<b>Анықтамасы:</b> әртүрлі мәдениет пен дәстүрдегі адамдар арасындағы қарым-қатынас."],
+    right: ["<b>Мысал:</b> шетелдік серіктеспен келіссөз жүргізгенде оның әдет-ғұрпын құрметтеу."] },
+  { kicker: "Термин", title: "Резюме", subtitle: "", // 8-слайд
+    left: ["<b>Анықтамасы:</b> адамның білімі, дағдысы және жұмыс тәжірибесі туралы қысқаша құжат."],
+    right: ["<b>Мақсаты:</b> жұмыс берушіге өзін тиімді таныстыру."] },
+  { kicker: "Қорытынды", title: "Негізгі қорытындылар", subtitle: "", // 9-слайд
+    left: ["<ul><li>Бизнестегі табыс көбіне дұрыс қарым-қатынасқа байланысты.</li><li>Эмоциялық интеллект пен мәдениетті құрметтеу командада жұмысты жеңілдетеді.</li></ul>"],
+    right: ["<ul><li>Жақсы презентация мен резюме болашақ мансаптың кілті.</li></ul>"] },
+  { final: true, title: "Назар аударғандарыңызға рахмет!", author: "Сержан Біржан" } // 10-слайд
+];
+
+/* Мұқаба мәліметтері */
+const BOOK = {
+  title: "Қазіргі бизнес-коммуникация",
+  subtitle: "Business Communication Today",
+  edition: "14th Edition",
+  tag: "14-ші басылым",
+  authors: ["Куртланд Л. Бове", "Джон В. Тилл"],
+  publisher: "Pearson",
+  runningLeft: "Қазіргі бизнес-коммуникация",
+  runningRight: "Бове · Тилл",
+  frontImage: "assets/cover-front.jpg",  // мұқабаның алдыңғы жағы (фото)
+  backImage: "assets/cover-back.jpg"     // мұқабаның артқы жағы (фото)
+};
+
+/* ==================================================================
+   2. КӨМЕКШІ ФУНКЦИЯЛАР
+   ================================================================== */
+const $ = s => document.querySelector(s);
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ph = (p, a, b) => clamp((p - a) / (b - a));
+const E = {
+  linear: t => t,
+  inOutQuad: t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2,
+  inOutCubic: t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2,
+  inOutQuint: t => t < .5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2,
+  inOutSine: t => -(Math.cos(Math.PI * t) - 1) / 2,
+  outCubic: t => 1 - Math.pow(1 - t, 3),
+  outQuart: t => 1 - Math.pow(1 - t, 4),
+  smooth: t => t * t * (3 - 2 * t),
+  gust: t => 1 - Math.pow(1 - t, 2.3) * (1 - .15 * Math.sin(Math.PI * t)),
+  hover: t => t < .38 ? E.outCubic(t / .38) * .52
+            : t < .62 ? .52 + .07 * E.inOutSine((t - .38) / .24)
+            : .59 + .41 * E.inOutCubic((t - .62) / .38)
+};
+/* Cubic-bezier жеңілдету (CSS cubic-bezier сияқты) — жұмсақ бастау, ұзақ баяулау */
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx;
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const X = t => ((ax * t + bx) * t + cx) * t, Y = t => ((ay * t + by) * t + cy) * t;
+  const dX = t => (3 * ax * t + 2 * bx) * t + cx;
+  return x => {
+    if (x <= 0) return 0; if (x >= 1) return 1;
+    let t = x;
+    for (let i = 0; i < 8; i++) { const e = X(t) - x; if (Math.abs(e) < 1e-5) return Y(t); const d = dX(t); if (Math.abs(d) < 1e-6) break; t -= e / d; }
+    let lo = 0, hi = 1; t = x;
+    for (let i = 0; i < 28; i++) { const v = X(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
+    return Y(t);
+  };
+}
+Object.assign(E, {
+  silk:  bezier(.55, 0, .2, 1),     // жібектей: баяу бастау, ұзақ жұмсақ тоқтау
+  glide: bezier(.45, .05, .15, 1),  // мұқаба үшін
+  soft:  bezier(.4, 0, .2, 1),
+  heavy: bezier(.65, 0, .25, 1),
+  quick: bezier(.25, .7, .2, 1)
+});
+const raf2 = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+function tween(dur, fn) {
+  return new Promise(res => {
+    const t0 = performance.now();
+    const step = now => {
+      const t = Math.min(dur, now - t0);
+      fn(t, dur ? t / dur : 1);
+      if (t < dur) requestAnimationFrame(step); else res();
+    };
+    requestAnimationFrame(step);
+  });
+}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ==================================================================
+   3. ДЫБЫС (Web Audio API — синтез, сүзілген шу)
+   ================================================================== */
+const Sound = {
+  ctx: null, out: null, noise: null, on: true,
+  init() {
+    if (this.ctx) { if (this.ctx.state === "suspended") this.ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    const c = this.ctx = new AC();
+    const comp = c.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 4;
+    this.out = c.createGain(); this.out.gain.value = this.on ? .9 : 0;
+    this.out.connect(comp).connect(c.destination);
+    const len = c.sampleRate * 2, buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    let b = 0;
+    for (let i = 0; i < len; i++) { const w = Math.random() * 2 - 1; b = .97 * b + .03 * w; d[i] = w * .75 + b * 2.2; }
+    this.noise = buf;
+  },
+  ok() { return this.ctx && this.on; },
+  src(t, dur) {
+    const s = this.ctx.createBufferSource(); s.buffer = this.noise; s.loop = true;
+    s.start(t, Math.random() * 1.5); s.stop(t + dur + .05); return s;
+  },
+  burst(t, d, f, gain, q = 1.2) {
+    const c = this.ctx, s = this.src(t, d), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = "bandpass"; bp.frequency.value = f; bp.Q.value = q;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + d * .2); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    s.connect(bp).connect(g).connect(this.out);
+  },
+  thump(t, amt, f = 110) {
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(f * .45, t + .14);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.32 * amt, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + .2);
+    o.connect(g).connect(this.out); o.start(t); o.stop(t + .25);
+    const s = this.src(t, .08), lp = c.createBiquadFilter(), g2 = c.createGain();
+    lp.type = "lowpass"; lp.frequency.value = 650;
+    g2.gain.setValueAtTime(.0001, t); g2.gain.exponentialRampToValueAtTime(.5 * amt, t + .005); g2.gain.exponentialRampToValueAtTime(.0001, t + .07);
+    s.connect(lp).connect(g2).connect(this.out);
+  },
+  paper(o, delay = 0) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + .015 + delay, dur = o.dur;
+    const s = this.src(t, dur + .1);
+    const hp = c.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = o.hp || 260;
+    const bp = c.createBiquadFilter(); bp.type = "bandpass"; bp.Q.value = o.Q;
+    bp.frequency.setValueAtTime(o.f0, t);
+    bp.frequency.exponentialRampToValueAtTime(o.f1, t + dur * .55);
+    bp.frequency.exponentialRampToValueAtTime(o.f2 || o.f0, t + dur);
+    const g = c.createGain();
+    g.gain.setValueAtTime(.0001, t);
+    g.gain.exponentialRampToValueAtTime(o.gain, t + o.attack);
+    g.gain.exponentialRampToValueAtTime(o.gain * .45, t + dur * .65);
+    g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    s.connect(hp).connect(bp).connect(g);
+    if (o.am) {
+      const am = c.createGain(); am.gain.value = 1 - o.amDepth;
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = o.am; lg.gain.value = o.amDepth;
+      lfo.connect(lg).connect(am.gain); lfo.start(t); lfo.stop(t + dur + .1);
+      g.connect(am).connect(this.out);
+    } else g.connect(this.out);
+    for (let i = 0; i < (o.crinkles || 0); i++) {
+      this.burst(t + Math.random() * dur * .85, .006 + Math.random() * .022, o.cf * (.7 + Math.random() * .6), o.cg * (.4 + Math.random() * .8));
+    }
+    if (o.thump) this.thump(t + (o.thumpAt ?? dur * .8), o.thump, o.thumpF || 110);
+  },
+  click() {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + .005, o = c.createOscillator(), g = c.createGain();
+    o.type = "triangle"; o.frequency.setValueAtTime(2300, t); o.frequency.exponentialRampToValueAtTime(1100, t + .04);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.13, t + .004); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+    o.connect(g).connect(this.out); o.start(t); o.stop(t + .08);
+    this.burst(t, .012, 4200, .08);
+  },
+  creak(t, dur) {
+    const c = this.ctx, o = c.createOscillator(), bp = c.createBiquadFilter(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
+    o.type = "sawtooth"; o.frequency.value = 70;
+    lfo.frequency.value = 9; lg.gain.value = 14; lfo.connect(lg).connect(o.frequency);
+    bp.type = "bandpass"; bp.frequency.value = 1150; bp.Q.value = 9;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.05, t + dur * .3); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(bp).connect(g).connect(this.out);
+    o.start(t); lfo.start(t); o.stop(t + dur + .05); lfo.stop(t + dur + .05);
+  },
+  open() {
+    if (!this.ok()) return;
+    const t = this.ctx.currentTime;
+    this.creak(t + .1, .6);
+    this.paper({ dur: 1.35, f0: 450, f1: 1500, f2: 500, Q: .6, gain: .26, attack: .35, crinkles: 3, cf: 2600, cg: .06, thump: 1.0, thumpF: 82, thumpAt: 1.3 });
+  },
+  close() {
+    if (!this.ok()) return;
+    this.paper({ dur: 1.2, f0: 650, f1: 1800, f2: 420, Q: .7, gain: .28, attack: .3, crinkles: 2, cf: 2400, cg: .06, thump: 1.4, thumpF: 66, thumpAt: 1.22 });
+    this.burst(this.ctx.currentTime + 1.25, .05, 900, .2, .8);
+  },
+  chime() {
+    if (!this.ok()) return;
+    const c = this.ctx, t0 = c.currentTime + .03;
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((f, i) => {
+      const t = t0 + i * .11, o = c.createOscillator(), o2 = c.createOscillator(), g = c.createGain();
+      o.type = "sine"; o.frequency.value = f; o2.type = "triangle"; o2.frequency.value = f * 2.003;
+      const g2 = c.createGain(); g2.gain.value = .25; o2.connect(g2).connect(g);
+      g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.06, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + 2.6);
+      o.connect(g).connect(this.out); o.start(t); o2.start(t); o.stop(t + 2.7); o2.stop(t + 2.7);
+    });
+    this.paper({ dur: 1.6, f0: 5000, f1: 8000, f2: 4000, Q: .5, gain: .05, attack: .5, crinkles: 10, cf: 7000, cg: .05 });
+  },
+  whoosh(d = 1.2) {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + .02, s = this.src(t, d), bp = c.createBiquadFilter(), g = c.createGain();
+    bp.type = "bandpass"; bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(300, t); bp.frequency.exponentialRampToValueAtTime(2400, t + d * .5); bp.frequency.exponentialRampToValueAtTime(350, t + d);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.3, t + d * .45); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    s.connect(bp).connect(g).connect(this.out);
+  },
+  spin() {
+    if (!this.ok()) return;
+    const c = this.ctx, t = c.currentTime + .02, s = this.src(t, 1.7), lp = c.createBiquadFilter(), g = c.createGain();
+    lp.type = "lowpass"; lp.Q.value = 3;
+    lp.frequency.setValueAtTime(260, t); lp.frequency.exponentialRampToValueAtTime(1300, t + .8); lp.frequency.exponentialRampToValueAtTime(240, t + 1.6);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.22, t + .6); g.gain.exponentialRampToValueAtTime(.0001, t + 1.65);
+    s.connect(lp).connect(g).connect(this.out);
+    const o = c.createOscillator(), og = c.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(520, t + .9); o.frequency.exponentialRampToValueAtTime(1040, t + 1.6);
+    og.gain.setValueAtTime(.0001, t + .9); og.gain.exponentialRampToValueAtTime(.035, t + 1.2); og.gain.exponentialRampToValueAtTime(.0001, t + 2.4);
+    o.connect(og).connect(this.out); o.start(t + .9); o.stop(t + 2.5);
+  }
+};
+
+/* ==================================================================
+   4. ПАРАҚТАУ АНИМАЦИЯЛАРЫ — әр ауысымның өз стилі мен дыбысы
+   ------------------------------------------------------------------
+   STYLES[i] — i+1 жайылымнан i+2 жайылымға ауысу (кері бағытта да).
+   ================================================================== */
+const STYLES = [
+  { id: "classic", name: "Классикалық иілу", leaves: 1, dur: 1300, stagger: 0,
+    P: { ease: E.silk, d: .34, g: 1.5, settle: 2.2, tilt: 1.1, lift: .03 },
+    snd: { dur: .8, f0: 1200, f1: 3600, f2: 1500, Q: .9, gain: .32, attack: .1, crinkles: 6, cf: 4200, cg: .12, thump: .35 } },
+  { id: "fan", name: "Жылдам желпуіш", leaves: 4, dur: 820, stagger: 130,
+    P: { ease: E.soft, d: .28, g: 1.4, settle: 1.6, tilt: .8, lift: .015 },
+    snd: { dur: .42, f0: 2000, f1: 5200, f2: 2600, Q: 1.2, gain: .22, attack: .04, crinkles: 3, cf: 5500, cg: .1, thump: .16, thumpF: 150 } },
+  { id: "heavy", name: "Ауыр, баяу аудару", leaves: 1, dur: 2100, stagger: 0,
+    P: { ease: E.heavy, d: .2, g: 1.2, settle: 1.4, tilt: 1.6, lift: .04 },
+    snd: { dur: 1.9, f0: 330, f1: 1150, f2: 380, Q: .7, gain: .36, attack: .55, crinkles: 4, cf: 2200, cg: .08, thump: 1.0, thumpF: 72 } },
+  { id: "wind", name: "Жеңіл жел", leaves: 1, dur: 1600, stagger: 0,
+    P: { ease: E.silk, d: .46, g: 1.8, wave: 9, waveSpeed: 1.4, settle: 3, tilt: 1.4, lift: .05 },
+    snd: { dur: 1.4, f0: 600, f1: 2600, f2: 900, Q: 2.2, gain: .3, attack: .22, am: 14, amDepth: .55, crinkles: 8, cf: 3800, cg: .08, thump: .3 } },
+  { id: "roll", name: "Орама", leaves: 1, dur: 1450, stagger: 0,
+    P: { ease: E.silk, d: .5, g: 2.2, settle: 2, tilt: 1.2, lift: .03 },
+    snd: { dur: 1.1, f0: 1800, f1: 4300, f2: 2100, Q: .8, gain: .3, attack: .12, crinkles: 16, cf: 4800, cg: .14, thump: .4 } },
+  { id: "snap", name: "Серпінді шапшаң", leaves: 1, dur: 820, stagger: 0,
+    P: { ease: E.quick, d: .26, g: 1.4, settle: 3, tilt: .7, lift: .015 },
+    snd: { dur: .45, f0: 2600, f1: 6500, f2: 3000, Q: 1.4, gain: .34, attack: .03, crinkles: 5, cf: 6000, cg: .2, thump: .6, thumpF: 140 } },
+  { id: "float", name: "Қалқыма", leaves: 1, dur: 2000, stagger: 0,
+    P: { ease: E.soft, d: .4, g: 1.6, wave: 5, waveSpeed: .9, settle: 2.4, tilt: 1.5, lift: .08 },
+    snd: { dur: 1.75, f0: 3000, f1: 5600, f2: 2400, Q: .5, gain: .17, attack: .6, am: 3, amDepth: .4, crinkles: 3, cf: 6500, cg: .05, thump: .22 } },
+  { id: "wave", name: "Толқын", leaves: 1, dur: 1700, stagger: 0,
+    P: { ease: E.glide, d: .3, g: 1.3, wave: 10, waveSpeed: 1.5, settle: 2.4, tilt: 1.2, lift: .04 },
+    snd: { dur: 1.3, f0: 900, f1: 3000, f2: 1200, Q: 1.1, gain: .28, attack: .2, am: 6, amDepth: .5, crinkles: 7, cf: 4000, cg: .1, thump: .3 } }
+];
+STYLES.forEach(s => { s.snd.thumpAt = s.dur * .93 / 1000; });
+const SETTLE_MS = 380;   // қонғаннан кейінгі жұмсақ "тыныс алу"
+
+/* Парақ иілісі. s — бет бойындағы орын (0 = түптеме, 1 = бос шет), pm — уақыт (0..1), sp — қону фазасы (0..1).
+   Әр жолақтың өз кідірісі бар: бос шет бірінші көтеріліп, түптеме жағы соңынан ілесіп, жұмсақ жайылып қонады.
+   Әр жолақ монотонды қозғалады (секіру, діріл жоқ) — сондықтан қозғалыс үздіксіз және тегіс. */
+const settleAmt = (P, s, sp) => P.settle * s * s * Math.sin(Math.PI * sp) * (1 - sp);
+function curve(P, pm, s, sp = 0) {
+  const w = 1 - Math.pow(s, P.g);
+  const u = clamp(pm * (1 + P.d) - P.d * w);
+  let phi = 180 * P.ease(u);
+  if (P.wave) phi += P.wave * Math.sin(Math.PI * u) * Math.sin(2 * Math.PI * (s * 1.1 - pm * P.waveSpeed)) * s;
+  if (sp > 0) phi -= settleAmt(P, s, sp);
+  return clamp(phi, 0, 180);
+}
+/* Саусақпен сүйрегенде де дәл сол иіліс (q — саусақтың орны 0..1) */
+function dragCurve(q, s) {
+  const P = STYLES[0].P, w = 1 - Math.pow(s, P.g);
+  const u = clamp(q * (1 + P.d) - P.d * w);
+  return clamp(180 * lerp(u, E.smooth(u), .45), 0, 180);
+}
+
+/* ==================================================================
+   5. ГЕОМЕТРИЯ ЖӘНЕ DOM
+   ================================================================== */
+const G = { W: 400, H: 550, m: 12, S: 10, D: 12, N: 16, closedScale: 1.2, openTilt: 16, cy: 300 };
+const R = { offX: -.5, rotX: 16, rotY: 26, rotZ: -3, scale: 1.2, open: 0, lift: 0 };
+let state = 0;           // 0 = мұқаба, 1..9 = жайылымдар, 10 = артқы мұқаба
+let busy = false, pending = null;
+
+const stage = $("#stage"), rig = $("#rig"), book = $("#book"), floorEl = $("#floor");
+
+function coverHTML() {
+  return `<div class="cover"><img class="photo" src="${BOOK.frontImage}" alt="${BOOK.title}" draggable="false"></div>`;
+}
+function backCoverHTML() {
+  const f = SLIDES[SLIDES.length - 1] || {};
+  let n = 0;
+  const letters = (f.title || "").split(" ").map(w =>
+    `<span class="w">${[...w].map(ch => `<span class="ch" style="transition-delay:${(.75 + (n++) * .035).toFixed(3)}s">${ch}</span>`).join("")}</span>`).join(" ");
+  return `<div class="cover back-cover"><img class="photo" src="${BOOK.backImage}" alt="" draggable="false">
+    <div class="bc-card"><div class="kick">${f.kicker || "Соңы"}</div><h2>${letters}</h2><span class="orn"></span><p>${f.author || ""}</p></div>
+    <div class="bc-shine"></div></div>`;
+}
+function paras(arr, drop) {
+  if (!arr || !arr.length) {
+    const blk = `<div class="ph-block"><span class="lbl">Мәтін орны</span><i></i><i></i><i></i><i></i><i class="short"></i></div>`;
+    return blk + blk;
+  }
+  return arr.map((p, i) => /^\s*<(ul|ol|div|h3|blockquote)/i.test(p) ? p : `<p class="${drop && i === 0 ? "drop" : ""}">${p}</p>`).join("");
+}
+function pageHTML(k, side) {
+  if (k == null) return `<div class="pg ${side} blank"><div class="lines"></div></div>`;
+  const s = SLIDES[k - 1] || {}, num = side === "left" ? 2 * k : 2 * k + 1;
+  if (side === "left") {
+    return `<div class="pg left"><div class="run">${BOOK.runningLeft}</div>
+      <div class="kicker">${s.kicker || k + "-слайд"}</div>
+      ${s.title ? `<h2>${s.title}</h2>` : `<h2 class="ph">Тақырып</h2>`}
+      ${s.subtitle ? `<h3>${s.subtitle}</h3>` : ""}
+      <div class="rule"></div>${paras(s.left, true)}
+      <div class="num">${num}</div></div>`;
+  }
+  return `<div class="pg right"><div class="run">${BOOK.runningRight}</div>
+    <div class="right-top">${paras(s.right, false)}</div>
+    <div class="num">${num}</div></div>`;
+}
+function insideHTML(k) { return `<div class="inside"><div class="pg-wrap">${pageHTML(k, "left")}</div></div>`; }
+
+book.innerHTML = `
+  <div id="spread" class="hidden">
+    <div class="board b-left side-left"></div><div class="board b-right"></div>
+    <div class="edge fe-left side-left"></div><div class="edge fe-right"></div>
+    <div class="edge be-left side-left"></div><div class="edge be-right"></div>
+    <div class="page static p-left side-left" id="pageL"><div class="pc"></div><div class="pshadow"></div></div>
+    <div class="page static p-right" id="pageR"><div class="pc"></div><div class="pshadow"></div></div>
+    <div id="leaves"></div>
+  </div>
+  <div id="closed">
+    <div class="cf front">${coverHTML()}</div>
+    <div class="cf back">${backCoverHTML()}</div>
+    <div class="cf spine"><div class="spine-text"><span>${BOOK.authors.map(a => a.split(" ").pop()).join(" · ")}</span><span>${BOOK.title}</span><span>${BOOK.publisher}</span></div></div>
+    <div class="cf fore"></div><div class="cf top"></div><div class="cf bottom"></div>
+  </div>`;
+const spread = $("#spread"), closed = $("#closed"), leavesEl = $("#leaves");
+const pageL = $("#pageL"), pageR = $("#pageR");
+const shL = pageL.querySelector(".pshadow"), shR = pageR.querySelector(".pshadow");
+const setPage = (el, k, side) => { el.querySelector(".pc").innerHTML = pageHTML(k, side); };
+
+function layout() {
+  const vw = innerWidth, vh = innerHeight, mobile = vw < 640;
+  const top = mobile ? 56 : 64, bot = mobile ? 86 : 100;
+  const availH = vh - top - bot, availW = vw * .94;
+  const ratio = vw / vh < .8 ? 1.5 : 1.38;
+  const W = Math.max(120, Math.min(availW / 2.08, (availH * .9) / ratio, 540));
+  G.W = W; G.H = W * ratio; G.m = W * .028; G.S = Math.max(5, W * .03); G.D = G.S + 2;
+  G.N = mobile ? 12 : 18;
+  G.cy = top + availH / 2;
+  G.closedScale = Math.min(1.45, (availH * .82) / (G.H + 2 * G.m), (availW * .62) / (G.W + G.m));
+  G.openTilt = vw / vh < .8 ? 10 : 16;
+  const st = book.style;
+  st.setProperty("--W", W + "px"); st.setProperty("--H", G.H + "px"); st.setProperty("--m", G.m + "px");
+  st.setProperty("--S", G.S + "px"); st.setProperty("--D", G.D + "px"); st.setProperty("--u", (W / 100) + "px");
+  stage.style.setProperty("--persp", (W * 5.2) + "px");
+  stage.style.setProperty("--cy", G.cy + "px");
+  $("#hint").style.top = Math.min(vh - bot - 34, G.cy + (G.H / 2 + G.m) * G.closedScale * .92 + 26) + "px";
+  if (!busy) {
+    if (state === 0 || state === 10) R.scale = G.closedScale; else R.scale = 1;
+    if (state >= 1 && state <= 9) R.rotX = G.openTilt;
+  }
+  updateRig();
+}
+
+function updateRig() {
+  rig.style.transform = `translateY(${-R.lift}px) rotateX(${R.rotX}deg) rotateY(${R.rotY}deg) rotateZ(${R.rotZ}deg) scale3d(${R.scale},${R.scale},${R.scale})`;
+  book.style.transform = `translate3d(${R.offX * G.W}px,0,${-G.D / 2}px)`;
+  const turn = .62 + .38 * Math.abs(Math.cos(R.rotY * Math.PI / 180));
+  const w = G.W * (1.1 + 1.05 * R.open) * R.scale * turn;
+  floorEl.style.width = w + "px";
+  floorEl.style.height = (G.H * .14 * R.scale + 18) + "px";
+  floorEl.style.top = (G.cy + (G.H / 2) * R.scale * Math.cos(R.rotX * Math.PI / 180) + 6 + R.lift * .2) + "px";
+  floorEl.style.opacity = clamp(1 - R.lift / 120, .4, 1);
+}
+function tweenRig(to, dur, ease = E.inOutCubic) {
+  const from = { ...R };
+  return tween(dur, (t, p) => { const e = ease(p); for (const k in to) R[k] = lerp(from[k], to[k], e); updateRig(); });
+}
+const REST = () => ({ offX: -.5, rotX: 16, rotY: 26, rotZ: -3, scale: G.closedScale, open: 0, lift: 0 });
+
+/* ---------- Парақ (жолақтармен иілетін) ---------- */
+function makeLeaf(frontHTML, backHTML, kind, n) {
+  const leaf = document.createElement("div");
+  leaf.className = "leaf " + kind;
+  leaf.style.setProperty("--n", n);
+  leaf.style.setProperty("--lw", kind === "lcover" ? "calc(var(--W) + var(--m))" : "var(--W)");
+  const strips = [], shF = [], shB = [];
+  let parent = leaf;
+  for (let i = 0; i < n; i++) {
+    const st = document.createElement("div");
+    st.className = "strip";
+    st.style.left = i === 0 ? "0px" : "calc(var(--lw) / var(--n))";
+    st.innerHTML =
+      `<div class="face front"><div class="fc" style="left:calc(var(--lw) * ${-i} / ${n})">${frontHTML}</div><div class="sh"></div></div>` +
+      `<div class="face back"><div class="fc" style="left:calc(var(--lw) * ${-(n - 1 - i)} / ${n})">${backHTML}</div><div class="sh"></div></div>`;
+    parent.appendChild(st);
+    strips.push(st); shF.push(st.children[0].lastChild); shB.push(st.children[1].lastChild);
+    parent = st;
+  }
+  return { el: leaf, strips, shF, shB, n };
+}
+function shade(a, back) {
+  const r = a * Math.PI / 180;
+  let d = .45 * Math.sin(r) + .9 * Math.cos(r);
+  if (back) d = -d;
+  const b = d / .9;
+  return b >= 1 ? `rgba(255,255,255,${Math.min(.32, (b - 1) * 1.1).toFixed(3)})`
+                : `rgba(24,16,50,${Math.min(.5, (1 - b) * .42).toFixed(3)})`;
+}
+/* Көлеңке өз қабатында (.sh — will-change) жаңарады: бет мазмұны қайта салынбайды, ал градиент тегіс қалады */
+function applyLeaf(L, phis, z) {
+  let prev = 0;
+  const n = L.n;
+  for (let i = 0; i < n; i++) {
+    L.strips[i].style.transform = `rotateY(${(-(phis[i] - prev)).toFixed(3)}deg)`;
+    prev = phis[i];
+    const a0 = i === 0 ? phis[0] : (phis[i - 1] + phis[i]) / 2;
+    const a1 = i === n - 1 ? phis[i] : (phis[i] + phis[i + 1]) / 2;
+    L.shF[i].style.background = `linear-gradient(to right,${shade(a0, false)},${shade(a1, false)})`;
+    L.shB[i].style.background = `linear-gradient(to right,${shade(a1, true)},${shade(a0, true)})`;
+  }
+  L.el.style.transform = `translateZ(${z}px)`;
+  let xe = 0;
+  for (let i = 0; i < n; i++) xe += Math.cos(phis[i] * Math.PI / 180);
+  return xe / n;
+}
+function castShadows(xs) {
+  if (!xs.length) { shL.style.background = shR.style.background = "none"; return; }
+  const xr = Math.max(...xs), xl = Math.min(...xs), c = "rgba(22,14,48,";
+  if (xr > 0) {
+    const a = .34 * Math.sqrt(1 - xr * xr), e = xr * 100;
+    shR.style.background = `linear-gradient(to right,${c}${(a * .9).toFixed(3)}) 0%,${c}${(a * .55).toFixed(3)}) ${e}%,${c}0) ${Math.min(100, e + 8 + 30 * (1 - xr))}%)`;
+  } else {
+    shR.style.background = `linear-gradient(to right,${c}${(.14 * Math.sqrt(1 - xr * xr)).toFixed(3)}) 0%,${c}0) 22%)`;
+  }
+  if (xl < 0) {
+    const a = .34 * Math.sqrt(1 - xl * xl), e = -xl * 100;
+    shL.style.background = `linear-gradient(to left,${c}${(a * .9).toFixed(3)}) 0%,${c}${(a * .55).toFixed(3)}) ${e}%,${c}0) ${Math.min(100, e + 8 + 30 * (1 + xl))}%)`;
+  } else {
+    shL.style.background = `linear-gradient(to left,${c}${(.14 * Math.sqrt(1 - xl * xl)).toFixed(3)}) 0%,${c}0) 22%)`;
+  }
+}
+const sPos = n => Array.from({ length: n }, (_, i) => (i + .5) / n);
+
+/* ---------- Беттерді аудару ---------- */
+function setupFlip(from, to, count) {
+  const dir = to > from ? 1 : -1, n = G.N, leaves = [];
+  if (dir > 0) setPage(pageR, to, "right"); else setPage(pageL, to, "left");
+  for (let j = 0; j < count; j++) {
+    let front, back;
+    if (dir > 0) { front = j === 0 ? pageHTML(from, "right") : pageHTML(null, "right"); back = j === count - 1 ? pageHTML(to, "left") : pageHTML(null, "left"); }
+    else { back = j === 0 ? pageHTML(from, "left") : pageHTML(null, "left"); front = j === count - 1 ? pageHTML(to, "right") : pageHTML(null, "right"); }
+    const L = makeLeaf(front, back, "page", n);
+    applyLeaf(L, new Array(n).fill(dir > 0 ? 0 : 180), G.S + 1 + (count - j) * .4);
+    leavesEl.appendChild(L.el);
+    leaves.push(L);
+  }
+  return { from, to, dir, leaves, s: sPos(n) };
+}
+function renderFlip(ctx, phisList, lift = 0) {
+  const xs = [], cnt = ctx.leaves.length;
+  ctx.leaves.forEach((L, j) => {
+    const phis = phisList[j];
+    const mid = phis[Math.floor(phis.length / 2)];
+    const onStart = ctx.dir > 0 ? mid < 90 : mid > 90;
+    const rank = onStart ? cnt - 1 - j : j;
+    xs.push(applyLeaf(L, phis, G.S + 1 + rank * .45 + lift));
+  });
+  castShadows(xs);
+}
+function finishFlip(ctx, done) {
+  if (done) { if (ctx.dir > 0) setPage(pageL, ctx.to, "left"); else setPage(pageR, ctx.to, "right"); state = ctx.to; }
+  else { if (ctx.dir > 0) setPage(pageR, ctx.from, "right"); else setPage(pageL, ctx.from, "left"); }
+  leavesEl.innerHTML = "";
+  castShadows([]);
+}
+async function flip(from, to) {
+  const style = STYLES[(Math.min(from, to) - 1) % STYLES.length], P = style.P;
+  const count = style.leaves, ctx = setupFlip(from, to, count);
+  await raf2();   // парақ қабаттары алдын ала дайындалады — бастапқы кадр қатпайды
+  for (let j = 0; j < count; j++) Sound.paper({ ...style.snd, f1: style.snd.f1 * (1 + j * .06) }, j * style.stagger / 1000);
+  const mainTotal = style.dur + (count - 1) * style.stagger, total = mainTotal + SETTLE_MS;
+  const bx = R.rotX, bz = R.rotZ;
+  await tween(total, t => {
+    const list = ctx.leaves.map((L, j) => {
+      const loc = t - j * style.stagger;
+      const pm = clamp(loc / style.dur), sp = ph(loc, style.dur, style.dur + SETTLE_MS);
+      return ctx.s.map(s => { const v = curve(P, pm, s, sp); return ctx.dir > 0 ? v : 180 - v; });
+    });
+    const arc = Math.sin(Math.PI * clamp(t / mainTotal));
+    R.rotX = bx + P.tilt * arc; R.rotZ = bz - ctx.dir * P.tilt * .5 * arc;   // камера парақпен бірге сәл тыныс алады
+    updateRig();
+    renderFlip(ctx, list, P.lift * G.W * arc);
+  });
+  R.rotX = bx; R.rotZ = bz; updateRig();
+  finishFlip(ctx, true);
+}
+
+/* ---------- Кітапты ашу / жабу ---------- */
+const COVER_P = { ease: E.glide, d: .15, g: 1.4, settle: 1.8 };  // қатты мұқаба: шетінде сәл ғана иіледі
+function coverLeaf(k) {
+  const L = makeLeaf(coverHTML(), insideHTML(k), "lcover", 8);
+  L.s = sPos(L.n);
+  leavesEl.appendChild(L.el);
+  return L;
+}
+function rigStep(from, to, p, ease) { const e = ease(p); for (const k in to) R[k] = lerp(from[k], to[k], e); }
+/* Ашу: кітап бетін бұрады → мұқаба жұмсақ көтеріліп, жайылады, ал кітап ортаға сырғиды */
+async function openBook(k) {
+  $("#hint").classList.add("off");
+  await tweenRig({ rotY: 0, rotX: 10, rotZ: 0, scale: G.closedScale }, 750, E.soft);
+  setPage(pageR, k, "right"); setPage(pageL, k, "left");
+  spread.classList.remove("hidden"); spread.classList.add("no-left");
+  const L = coverLeaf(k);
+  applyLeaf(L, new Array(L.n).fill(0), G.D);
+  closed.classList.add("hidden");
+  await raf2();
+  Sound.open();
+  const from = { ...R }, to = { offX: 0, rotX: G.openTilt, open: 1, scale: 1 };
+  await tween(2000, (t, p) => {
+    const pm = ph(p, 0, .88), sp = ph(p, .88, 1);
+    const phis = L.s.map(s => curve(COVER_P, pm, s, sp));
+    const avg = phis.reduce((a, b) => a + b, 0) / L.n;
+    castShadows([applyLeaf(L, phis, lerp(G.D, G.S + 1.5, avg / 180))]);
+    const pr = ph(p, .06, 1);
+    rigStep(from, to, pr, E.silk);
+    R.lift = 14 * Math.sin(Math.PI * pr);
+    updateRig();
+  });
+  Object.assign(R, to, { lift: 0 }); updateRig();
+  spread.classList.remove("no-left");
+  leavesEl.innerHTML = ""; castShadows([]);
+  state = k;
+}
+async function closeBook(k, toFinal) {
+  setPage(pageR, k, "right");
+  spread.classList.add("no-left");
+  const L = coverLeaf(k);
+  applyLeaf(L, new Array(L.n).fill(180), G.S + 1.5);
+  await raf2();
+  Sound.close();
+  const from = { ...R }, to = { offX: -.5, rotX: 10, rotY: 0, rotZ: 0, open: 0, scale: G.closedScale };
+  await tween(1800, (t, p) => {
+    const pm = ph(p, 0, .88), sp = ph(p, .88, 1);
+    const phis = L.s.map(s => Math.max(0, 180 - curve(COVER_P, pm, s)) + (sp > 0 ? settleAmt(COVER_P, s, sp) : 0));
+    const avg = phis.reduce((a, b) => a + b, 0) / L.n;
+    castShadows([applyLeaf(L, phis, lerp(G.D, G.S + 1.5, avg / 180))]);
+    const pr = ph(p, 0, .94);
+    rigStep(from, to, pr, E.silk);
+    R.lift = 12 * Math.sin(Math.PI * pr);
+    updateRig();
+  });
+  Object.assign(R, to, { lift: 0 }); updateRig();
+  closed.classList.remove("hidden");
+  spread.classList.add("hidden"); spread.classList.remove("no-left");
+  leavesEl.innerHTML = ""; castShadows([]);
+  if (toFinal) {
+    await finale();
+    state = 10;
+  } else {
+    await tweenRig(REST(), 1100, E.soft);
+    $("#hint").classList.remove("off");
+    state = 0;
+  }
+}
+/* Финал: кітап ауаға көтеріліп, бір жарым айналып, артқы жағымен қонады */
+async function finale() {
+  await wait(120);
+  Sound.whoosh(2.4); Sound.spin();
+  const r0 = { ...R }, endY = 540 - 12, endX = 12;
+  await tween(2600, (t, p) => {
+    const e = E.inOutCubic(p), arc = Math.sin(Math.PI * p);
+    R.rotY = lerp(r0.rotY, endY, e);
+    R.rotX = lerp(r0.rotX, endX, e) - 26 * arc * arc;
+    R.rotZ = 7 * Math.sin(2 * Math.PI * p) * (1 - p) + 2 * e;
+    R.lift = arc * G.H * .3;
+    R.scale = r0.scale * (1 - .2 * arc);
+    updateRig();
+  });
+  if (Sound.ok()) Sound.thump(Sound.ctx.currentTime + .01, 1.2, 64);
+  await tween(650, (t, p) => {
+    const d = Math.exp(-5 * p) * Math.sin(3 * Math.PI * p);
+    R.lift = -d * 8; R.rotX = endX + d * 3.5; R.rotZ = 2 - d * .8;
+    updateRig();
+  });
+  R.rotY = endY - 360; updateRig();
+  closed.classList.add("finale");
+  setTimeout(() => Sound.chime(), 650);
+  setTimeout(confetti, 600);
+}
+function confetti() {
+  const box = $("#confetti"), cols = ["#8a3297", "#2c2f8f", "#35a6dc", "#a24fb3", "#4b3fb8"];
+  const cx = innerWidth / 2, cy = G.cy, rw = (G.W + G.m) * R.scale, rh = (G.H + 2 * G.m) * R.scale;
+  let html = "";
+  for (let i = 0; i < 64; i++) {
+    const a = Math.random() * Math.PI * 2, dist = Math.max(rw, rh) * (.55 + Math.random() * .9);
+    const sx = cx + Math.cos(a) * rw * .45, sy = cy + Math.sin(a) * rh * .45;
+    html += `<i style="left:${sx.toFixed(0)}px;top:${sy.toFixed(0)}px;--w:${(6 + Math.random() * 22).toFixed(0)}px;--h:${(2 + Math.random() * 5).toFixed(0)}px;--c:${cols[i % cols.length]};--x:${(Math.cos(a) * dist * .7).toFixed(0)}px;--y:${(Math.sin(a) * dist * .7 + 60).toFixed(0)}px;--r:${((Math.random() - .5) * 540).toFixed(0)}deg;--d:${(2.2 + Math.random() * 1.6).toFixed(2)}s;--dl:${(Math.random() * .5).toFixed(2)}s"></i>`;
+  }
+  box.innerHTML = html;
+  setTimeout(() => { box.innerHTML = ""; }, 4800);
+}
+async function reopenFromFinal() {
+  closed.classList.remove("finale");
+  Sound.spin();
+  await Promise.all([
+    tweenRig({ rotY: 0, rotX: 10, rotZ: 0 }, 1400, E.inOutCubic),
+    tween(1400, (t, p) => { R.lift = Math.sin(Math.PI * p) * G.H * .1; updateRig(); })
+  ]);
+  await openBook(9);
+}
+async function restart() {
+  closed.classList.remove("finale");
+  Sound.spin();
+  const r = REST();
+  await Promise.all([
+    tweenRig({ rotY: 360 + r.rotY, rotX: r.rotX, rotZ: r.rotZ }, 1600, E.inOutCubic),
+    tween(1600, (t, p) => { R.lift = Math.sin(Math.PI * p) * G.H * .1; updateRig(); })
+  ]);
+  R.rotY -= 360; updateRig();
+  $("#hint").classList.remove("off");
+  state = 0;
+}
+
+/* ==================================================================
+   6. НАВИГАЦИЯ
+   ================================================================== */
+async function run(action) {
+  if (busy) { pending = action; return; }
+  busy = true; document.body.classList.add("is-busy");
+  try { await action(); } finally {
+    busy = false; document.body.classList.remove("is-busy");
+    updateUI();
+    if (pending) { const p = pending; pending = null; p === "next" ? next() : prev(); }
+  }
+}
+function next() {
+  if (busy) { pending = "next"; return; }
+  Sound.init();
+  if (state === 0) run(() => openBook(1));
+  else if (state >= 1 && state <= 8) run(() => flip(state, state + 1));
+  else if (state === 9) run(() => closeBook(9, true));
+  else if (state === 10) run(restart);
+}
+function prev() {
+  if (busy) { pending = "prev"; return; }
+  Sound.init();
+  if (state >= 2 && state <= 9) run(() => flip(state, state - 1));
+  else if (state === 1) run(() => closeBook(1, false));
+  else if (state === 10) run(reopenFromFinal);
+}
+function updateUI() {
+  const ind = $("#indicator");
+  ind.innerHTML = (state === 0 ? "Мұқаба" : `${state} <small>/ ${SLIDES.length}</small>`) + `<span class="bar"><b style="width:${state / SLIDES.length * 100}%"></b></span>`;
+  $("#prevBtn").disabled = state === 0;
+  const nb = $("#nextBtn");
+  nb.querySelector(".txt").textContent = state === 10 ? "басына" : state === 0 ? "ашу" : "алға";
+  document.body.classList.toggle("is-open", state >= 1 && state <= 9);
+}
+
+$("#nextBtn").addEventListener("click", () => { Sound.init(); Sound.click(); next(); });
+$("#prevBtn").addEventListener("click", () => { Sound.init(); Sound.click(); prev(); });
+addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest("button") && (e.key === " " || e.key === "Enter")) return;
+  const k = e.key;
+  if (["ArrowRight", "ArrowDown", "PageDown", " ", "Enter"].includes(k)) { e.preventDefault(); next(); }
+  else if (["ArrowLeft", "ArrowUp", "PageUp", "Backspace"].includes(k)) { e.preventDefault(); prev(); }
+});
+
+/* ---------- Сүйреу, свайп, шетін басу ---------- */
+let ptr = null;
+stage.addEventListener("pointerdown", e => {
+  if (e.button !== 0) return;
+  Sound.init();
+  ptr = { id: e.pointerId, x0: e.clientX, y0: e.clientY, t0: performance.now(), drag: null, lx: e.clientX, lt: performance.now(), v: 0 };
+  stage.setPointerCapture(e.pointerId);
+});
+stage.addEventListener("pointermove", e => {
+  const cx = innerWidth / 2;
+  document.querySelector(".edge-hint.l").classList.toggle("on", e.clientX < cx - G.W * .15);
+  document.querySelector(".edge-hint.r").classList.toggle("on", e.clientX > cx + G.W * .15);
+  if (!ptr || ptr.id !== e.pointerId) return;
+  const dx = e.clientX - ptr.x0, dy = e.clientY - ptr.y0, now = performance.now();
+  ptr.v = (e.clientX - ptr.lx) / Math.max(1, now - ptr.lt); ptr.lx = e.clientX; ptr.lt = now;
+  if (!ptr.drag && !ptr.swipe && Math.abs(dx) > 14 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+    const dir = dx < 0 ? 1 : -1, to = state + dir;
+    if (!busy && state >= 1 && state <= 9 && to >= 1 && to <= 9) {
+      busy = true;
+      ptr.drag = setupFlip(state, to, 1);
+      Sound.paper({ dur: .35, f0: 1500, f1: 2800, f2: 1600, Q: .8, gain: .14, attack: .08, crinkles: 3, cf: 4500, cg: .07 });
+    } else ptr.swipe = dir;
+  }
+  if (ptr.drag) {
+    const q = clamp(Math.abs(dx) / (G.W * 1.5 * R.scale));
+    ptr.q = q;
+    const d = ptr.drag;
+    renderFlip(d, [d.s.map(s => { const v = dragCurve(q, s); return d.dir > 0 ? v : 180 - v; })]);
+  }
+});
+function endPointer(e) {
+  if (!ptr || ptr.id !== e.pointerId) return;
+  const p = ptr; ptr = null;
+  if (p.drag) {
+    const d = p.drag, q0 = p.q || 0;
+    const vq = (-p.v * d.dir) / (G.W * 1.5 * R.scale) * 1000; // q/s
+    const done = q0 > .45 || (vq > .9 && q0 > .04);
+    const target = done ? 1 : 0, dur = 160 + 520 * Math.abs(target - q0);
+    const render = q => renderFlip(d, [d.s.map(s => { const v = dragCurve(q, s); return d.dir > 0 ? v : 180 - v; })]);
+    if (done) Sound.paper({ dur: dur / 1000 + .15, f0: 1600, f1: 3600, f2: 1400, Q: .9, gain: .28, attack: .04, crinkles: 5, cf: 4300, cg: .1, thump: .35, thumpAt: dur / 1000 });
+    (async () => {
+      await tween(dur, (t, pp) => render(lerp(q0, target, E.outCubic(pp))));
+      if (done) {
+        await tween(SETTLE_MS, (t, sp) => renderFlip(d, [d.s.map(s => { const v = 180 - settleAmt(STYLES[0].P, s, sp); return d.dir > 0 ? v : 180 - v; })]));
+      }
+      finishFlip(d, done);
+      busy = false; updateUI();
+    })();
+    return;
+  }
+  if (p.swipe) { p.swipe > 0 ? next() : prev(); return; }
+  if (Math.hypot(e.clientX - p.x0, e.clientY - p.y0) > 10) return;
+  // шерту
+  if (state === 0) { Sound.click(); next(); return; }
+  if (state === 10) return;
+  e.clientX >= innerWidth / 2 ? next() : prev();
+}
+stage.addEventListener("pointerup", endPointer);
+stage.addEventListener("pointercancel", e => { if (ptr && ptr.drag && ptr.id === e.pointerId) { e = { pointerId: e.pointerId, clientX: ptr.x0, clientY: ptr.y0 }; ptr.q = 0; ptr.v = 0; } endPointer(e); });
+
+/* ---------- Дыбыс әрқашан қосулы: браузер рұқсаты бірінші әрекетте беріледі ---------- */
+["pointerdown", "keydown", "touchstart"].forEach(ev => addEventListener(ev, () => Sound.init(), { passive: true, capture: true }));
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 1600); }
+
+/* ==================================================================
+   7. ZIP ЖҮКТЕУ (сыртқы кітапханасыз)
+   ================================================================== */
+const README = `Қазіргі бизнес-коммуникация — 3D кітап-презентация
+====================================================
+
+Құрамы:
+  index.html               — бүкіл презентация (бір файл: HTML + CSS + JavaScript).
+  assets/cover-front.jpg   — мұқабаның алдыңғы жағы (фото).
+  assets/cover-back.jpg    — мұқабаның артқы жағы (фото).
+
+Қалай ашу керек:
+  index.html файлын кез келген заманауи браузерде ашыңыз
+  (Chrome, Edge, Safari, Firefox). Шрифттер Google Fonts арқылы жүктеледі.
+
+Мәтінді қалай өзгерту керек:
+  index.html ішіндегі скрипттің басында "const SLIDES = [" массиві бар.
+  Әр жолға title (тақырып), left (сол бет абзацтары),
+  right (оң бет абзацтары) жазыңыз. Қалған кодты өзгертудің қажеті жоқ.
+
+Басқару:
+  ← / →, бос орын — парақтау; кітаптың сол/оң жағын басу;
+  саусақпен сырғыту (свайп) немесе бетті сүйреу. Дыбыс әрқашан қосулы.
+
+-----------------------------------------------------
+Как изменить тексты: в начале скрипта в index.html найдите массив
+"const SLIDES = [" и впишите title / left / right для каждого слайда.
+Остальной код менять не нужно.
+`;
+const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(d) { let c = 0xFFFFFFFF; for (let i = 0; i < d.length; i++) c = CRC[(c ^ d[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function makeZip(files) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  const now = new Date();
+  const dt = ((now.getHours() << 11) | (now.getMinutes() << 5) | (now.getSeconds() >> 1)) & 0xFFFF;
+  const dd = (((now.getFullYear() - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate()) & 0xFFFF;
+  let offset = 0;
+  for (const f of files) {
+    const name = enc.encode(f.name), data = f.data, crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, dt, true); h.setUint16(12, dd, true); h.setUint32(14, crc, true);
+    h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, name.length, true); h.setUint16(28, 0, true);
+    parts.push(new Uint8Array(h.buffer), name, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, dt, true); c.setUint16(14, dd, true); c.setUint32(16, crc, true);
+    c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, name.length, true);
+    c.setUint32(42, offset, true);
+    central.push(new Uint8Array(c.buffer), name);
+    offset += 30 + name.length + data.length;
+  }
+  const csize = central.reduce((s, a) => s + a.length, 0);
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+  e.setUint32(12, csize, true); e.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(e.buffer)], { type: "application/zip" });
+}
+async function getSource() {
+  try {
+    const r = await fetch(location.href.split("#")[0], { cache: "no-store" });
+    if (!r.ok) throw 0;
+    const txt = await r.text();
+    if (!txt.includes("const SLIDES")) throw 0;
+    return txt;
+  } catch (_) {
+    const clone = document.documentElement.cloneNode(true);
+    clone.querySelector("#book").innerHTML = "";
+    clone.querySelectorAll("[style]").forEach(n => n.removeAttribute("style"));
+    return "<!DOCTYPE html>\n" + clone.outerHTML;
+  }
+}
+$("#zipBtn").addEventListener("click", async () => {
+  Sound.init(); Sound.click();
+  const enc = new TextEncoder();
+  const html = await getSource();
+  const files = [{ name: "index.html", data: enc.encode(html) }, { name: "README.txt", data: enc.encode(README) }];
+  for (const src of [BOOK.frontImage, BOOK.backImage]) {
+    try { const r = await fetch(src); if (r.ok) files.push({ name: src, data: new Uint8Array(await r.arrayBuffer()) }); } catch (_) {}
+  }
+  const blob = makeZip(files);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "kazirgi-biznes-kommunikatsiya-3d-presentation.zip";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("ZIP жүктелді");
+});
+
+/* ==================================================================
+   8. ІСКЕ ҚОСУ
+   ================================================================== */
+let rz;
+addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(layout, 120); });
+Object.assign(R, REST());
+layout();
+Object.assign(R, REST());
+R.lift = 40; updateRig();
+updateUI();
+const start = () => {
+  stage.classList.add("ready");
+  tween(1900, (t, p) => { R.lift = 40 * (1 - E.silk(p)); updateRig(); });
+};
+const imgReady = [BOOK.frontImage, BOOK.backImage].map(src => new Promise(r => { const im = new Image(); im.onload = im.onerror = r; im.src = src; }));
+Promise.all([document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve(), ...imgReady]).then(() => stage.classList.contains("ready") || start());
+setTimeout(() => stage.classList.contains("ready") || start(), 2500);
+</script>
+</body>
+</html>
+<script async src="/.netlify/scripts/ar" data-netlify-deploy-id="6aecd0bfd02b1387df8819b8" data-netlify-site-id="c9ddb008-16a8-4a95-831b-1a84d3adada3" data-agent-runner-id="6aeccebb3bf2bf9c9330f115"></script>
+<script async src="/.netlify/scripts/hud?variant=owner-private" data-nf-variant="owner-private" data-netlify-site-id="c9ddb008-16a8-4a95-831b-1a84d3adada3" data-app-host="app.netlify.com"></script>
